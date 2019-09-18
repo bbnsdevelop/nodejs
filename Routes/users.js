@@ -2,8 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Users = require('../model/user-model');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
+// funcções auxiliares
 
+const createUserToken = (userId) =>{
+    return jwt.sign({id: userId}, 'feijaocomarroz', {expiresIn: '7d'});
+}
 
 //-------------------------- funções async ------------------------------------ //
 router.get('/async', async (req, res) =>{
@@ -24,7 +29,7 @@ router.post('/create-async', async (req, res) =>{
 
         const user = await Users.create(req.body);
         user.password = undefined;
-        return res.send(user);
+        return res.send({user, token: createUserToken(user.id)});
     } catch (error) {
         return res.send({erro: 'Erro ao criar usuário'})
     }
@@ -44,7 +49,7 @@ router.post('/auth-async', async (req, res) =>{
         if(!passOk) return res.send({error: 'Senha inválida!'});
 
         user.password = undefined;
-        return res.send(user);
+        return res.send({user, token: createUserToken(user.id) });
 
     } catch (error) {
         return res.send({error: 'Erro ao autencicar usuário'});        
@@ -80,7 +85,7 @@ router.post('/create', (req, res) =>{
         Users.create(req.body, (err, data) =>{
             if(err) return res.send({error: 'Erro ao criar usuário!'});
             data.password = undefined;
-            return res.send(data);
+            return res.send({data, token: createUserToken(dara.id) });
         });
     });
 });
@@ -97,7 +102,7 @@ router.post('/auth', (req,res) =>{
             if(!same) return res.send({error: 'Erro ao autenticar usuário'});
             
             data.password = undefined;
-            return res.send(data);
+            return res.send({data, token: createUserToken(data.id) });
         });
     }).select('+password');
 });
