@@ -14,9 +14,9 @@ const createUserToken = (userId) =>{
 router.get('/async', async (req, res) =>{
     try {
         const users = await Users.find({});
-        return res.send(users);
+        return res.status(200).send(users);
     } catch (error) {
-        return res.send({error: 'Erro na busca dos usuários'});
+        return res.status(400).send({error: 'Erro na busca dos usuários'});
     }
 });
 
@@ -29,9 +29,9 @@ router.post('/create-async', async (req, res) =>{
 
         const user = await Users.create(req.body);
         user.password = undefined;
-        return res.send({user, token: createUserToken(user.id)});
+        return res.status(201).send({user, token: createUserToken(user.id)});
     } catch (error) {
-        return res.send({erro: 'Erro ao criar usuário'})
+        return res.status(400).send({erro: 'Erro ao criar usuário'})
     }
 
 });
@@ -43,16 +43,16 @@ router.post('/auth-async', async (req, res) =>{
 
     try {
         const user = await Users.findOne({email}).select('+password');
-        if(!user) return res.send({error: 'Usuário não registrado'});
+        if(!user) return res.status(400).send({error: 'Usuário não registrado'});
 
         const passOk = await bcrypt.compare(password, user.password);
-        if(!passOk) return res.send({error: 'Senha inválida!'});
+        if(!passOk) return res.status(400).send({error: 'Senha inválida!'});
 
         user.password = undefined;
-        return res.send({user, token: createUserToken(user.id) });
+        return res.status(200).send({user, token: createUserToken(user.id) });
 
     } catch (error) {
-        return res.send({error: 'Erro ao autencicar usuário'});        
+        return res.status(400).send({error: 'Erro ao autencicar usuário'});        
     }
 });
 
@@ -60,8 +60,8 @@ router.post('/auth-async', async (req, res) =>{
 
 router.get('/', (req, res) =>{
     Users.find({}, (err, data) =>{
-        if(err) return res.send({error: 'Erro na consulta de usuário!'});
-        return res.send(data);
+        if(err) return res.status(400).send({error: 'Erro na consulta de usuário!'});
+        return res.status(200).send(data);
     });
     //return res.send({message: `Tudo certo com o método GET in USERS! Nome: ${obj.nome} Idade: ${obj.idade}`});
 });
@@ -74,18 +74,18 @@ router.post('/', (req, res) =>{
 
 router.post('/create', (req, res) =>{
     const {email, password} = req.body;
-    if(!email || !password) return res.send({error: 'Dados insuficientes!'})
+    if(!email || !password) return res.status(400).send({error: 'Dados insuficientes!'})
     
     Users.findOne({email}, (err, data) =>{
         
         // validações
-        if(err) return res.send({error: 'Erro ao buscar usuário!'});
-        if(data) return res.send({error: 'Erro usuário já registrado!'});
+        if(err) return res.status(400).send({error: 'Erro ao buscar usuário!'});
+        if(data) return res.status(400).send({error: 'Erro usuário já registrado!'});
 
         Users.create(req.body, (err, data) =>{
             if(err) return res.send({error: 'Erro ao criar usuário!'});
             data.password = undefined;
-            return res.send({data, token: createUserToken(dara.id) });
+            return res.status(201).send({data, token: createUserToken(dara.id) });
         });
     });
 });
@@ -95,14 +95,14 @@ router.post('/auth', (req,res) =>{
     if(!email || !password) return res.send({error: 'Dados insuficientes!'})
 
     Users.findOne({email}, (err, data) =>{
-        if(err) return res.send({error: 'Erro ao buscar usuário!'});
-        if(!data) return res.send({error: 'Usuário não registrado!'});
+        if(err) return res.status(400).send({error: 'Erro ao buscar usuário!'});
+        if(!data) return res.status(400).send({error: 'Usuário não registrado!'});
 
         bcrypt.compare(password, data.password, (err, same) =>{
-            if(!same) return res.send({error: 'Erro ao autenticar usuário'});
+            if(!same) return res.status(400).send({error: 'Erro ao autenticar usuário'});
             
             data.password = undefined;
-            return res.send({data, token: createUserToken(data.id) });
+            return res.status(200).send({data, token: createUserToken(data.id) });
         });
     }).select('+password');
 });
