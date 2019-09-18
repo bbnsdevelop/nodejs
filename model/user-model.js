@@ -11,14 +11,18 @@ const UserSchema = new Schema({
 
 // preparando antes de salvar um novo usuário
 
-UserSchema.pre('save', function(next){
+UserSchema.pre('save', async function(next){
     let user = this;
     if(!user.isModified('password')) return next();
 
+    user.password = await bcrypt.hash(user.password, 10);
+    return next();
+
+    /* forma antiga
     bcrypt.hash(user.password, 10, (err, encrypted) =>{
         user.password = encrypted;
         return next();
-    });
+    });*/
 });
 
 module.exports = mongoose.model('User', UserSchema);
