@@ -2,9 +2,10 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser')
+const config = require('./config/config')
 
 // string de conexão 
-const url = 'mongodb+srv://usuario_admin:6559279bb2@clusterapi-2jqic.mongodb.net/test?retryWrites=true&w=majority'
+const url = config.url_bd
 const options = {reconnectTries: Number.MAX_VALUE, reconnectInterval: 500, poolSize: 5, useNewUrlParser: true, useUnifiedTopology: true };
 
 mongoose.connect(url, options);
